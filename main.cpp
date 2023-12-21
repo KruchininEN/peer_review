@@ -12,7 +12,6 @@ public:
     Domain(const string& line)
         : domain_(line)
     {
-        domain_.push_back('.');
         reverse(domain_.begin(), domain_.end());
         domain_.push_back('.');
     }
@@ -26,20 +25,7 @@ public:
 
     // subdomain check
     bool IsSubdomain(const Domain& other) const {
-
-        // subdomain cannot be longer than domain
-        if (domain_.size() < other.domain_.size()) { return false; }
-        
-        auto it_1 = other.domain_.begin();
-        auto it_2 = other.domain_.end();
-        auto it_3 = domain_.begin();
-
-        while (it_1 != it_2 && *it_1 == *it_3) {
-            ++it_1;
-            ++it_3;
-        }
-
-        return it_1 == it_2;
+        return name_.find(other.name_) == 0;
     }
 
 private:
