@@ -1,5 +1,5 @@
-vector <Person> LoadPersons 
-(
+struct DBParameters
+{
     std::string_view db_name,       // имя
     int db_connection_timeout,      // таймаут подключения к базе данных
     bool db_allow_exceptions,       // разрешение генерации исключений при работе с базой данных
@@ -7,22 +7,21 @@ vector <Person> LoadPersons
     int min_age,                    // минимальный возраст людей
     int max_age,                    // максимальный возраст людей
     std::string_view name_filter    // фильтр имени
-) 
-{
-    if (min_age > max_age) {
-        throw std::invalid_argument("Invalid age range");
-    }
 
-    DBConnector connector (db_allow_exceptions, db_log_level);
+};
+
+vector <Person> LoadPersons ( const DBParameters & params) {
+
+    DBConnector connector (params.db_allow_exceptions, params.db_log_level);
     DBHandler db;
 
-    if (db_name.starts_with("tmp."s)) {
-        db = connector.ConnectTmp(db_name, db_connection_timeout);
+    if (params.db_name.starts_with("tmp."s)) {
+        db = connector.ConnectTmp(params.db_name, params.db_connection_timeout);
     }
     else {
-        db = connector.Connect(db_name, db_connection_timeout);
+        db = connector.Connect(params.db_name, params.db_connection_timeout);
     }
-    if (!db_allow_exceptions && !db.IsOK()) {
+    if (!params.db_allow_exceptions && !db.IsOK()) {
         return {};
     }
 
@@ -30,8 +29,8 @@ vector <Person> LoadPersons
     query_str   << "FROM Persons "s
                 << "SELECT Name, Age "s
                 << "WHERE Age between "s
-                << min_age << " AND "s << max_age 
-                << " and Name like '%"s << db.Quote(name_filter) << "%'"s;
+                << params.min_age << " AND "s << params.max_age
+                << " and Name like '%"s << db.Quote(params.name_filter) << "%'"s;
     
     DBQuery query(query_str.str());
 
